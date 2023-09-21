@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  # GitLab Container
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    #hostname: test.com # Change to your desired hostname
+    #environment:
+    #  GITLAB_OMNIBUS_CONFIG: |
+    #    external_url 'http://gitlab.example.com' # Change to your desired external URL
+    ports:
+      - "80:80"
+      - "443:443"
+      - "22:22" # SSH access
+    volumes:
+      - /srv/gitlab/config:/etc/gitlab
+      - /srv/gitlab/logs:/var/log/gitlab
+      - /srv/gitlab/data:/var/opt/gitlab
+
+  # SonarQube Container
+  sonarqube:
+    image: sonarqube:developer
+    container_name: sonarqube
+    restart: always
+    environment:
+      SONARQUBE_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+      SONARQUBE_JDBC_USERNAME: sonarqube
+      SONARQUBE_JDBC_PASSWORD: sonarqube
+    ports:
+      - "9000:9000"
+    depends_on:
+      - sonarqube-db
+
+  # SonarQube Database Container
+  sonarqube-db:
+    image: postgres:latest
+    container_name: sonarqube-db
+    restart: always
+    environment:
+      POSTGRES_USER: sonarqube
+      POSTGRES_PASSWORD: sonarqube
+    volumes:
+      - /srv/sonarqube-db:/var/lib/postgresql/data
